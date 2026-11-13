@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BeatBorder – your screen edges, dancing to the beat</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050508;--fg:#ecebff;--mut:#a29fc4;--card:rgba(20,18,36,.74);--line:rgba(160,140,255,.22);--acc:#a56bff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050508;--fg:#ecebff;--mut:#a29fc4;--card:rgba(20,18,36,.74);--line:rgba(160,140,255,.22)}}
+:root[data-theme="dark"]{--bg:#050508;--fg:#ecebff;--mut:#a29fc4;--card:rgba(20,18,36,.74);--line:rgba(160,140,255,.22)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Space Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}
+#c{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+main{position:relative;z-index:1}
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:space-between;padding:28px 20px 24px;text-align:center}
+h1{margin:0;font-size:clamp(2.6rem,9vw,6rem);line-height:1;letter-spacing:-.03em;background:linear-gradient(90deg,#ff00cc,#7a5cff,#00e5ff,#ff00cc);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite;text-shadow: 0 0 40px rgba(122,92,255,0.4)}
+@keyframes flow{to{background-position:200% 0}}
+.sub{max-width:620px;margin:14px auto 0;color:var(--mut);font-size:clamp(1rem,2.4vw,1.2rem);line-height:1.5}
+.ctl{display:flex;flex-direction:column;gap:12px;align-items:center}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+.lbl{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-right:4px}
+button,.btn{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-decoration:none;transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:hover,.btn:hover{border-color:var(--acc);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+button.on{background:linear-gradient(90deg,#8b3dff,#00b4ff);border-color:transparent;box-shadow:0 0 15px rgba(0,180,255,0.4)}
+.cta{background:linear-gradient(90deg,#ff00cc,#7a5cff);border:0;font-weight:700;padding:12px 24px;box-shadow:0 0 20px rgba(255,0,204,0.4)}
+section.p{max-width:1000px;margin:0 auto;padding:70px 20px}
+h2{font-size:clamp(1.7rem,5vw,2.6rem);margin:0 0 8px;letter-spacing:-.02em}
+.lead{color:var(--mut);margin:0 0 28px;max-width:600px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform 0.3s}
+.card:hover{transform:translateY(-4px);border-color:var(--acc)}
+.card b{display:block;font-size:1.1rem;margin:6px 0}
+.card p{margin:0;color:var(--mut);line-height:1.5;font-size:.95rem}
+.ic{font-size:1.6rem}
+.num{font-size:2.2rem;font-weight:700;background:linear-gradient(90deg,#ff00cc,#00e5ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.code{position:relative;background:#0c0b18;border:1px solid var(--line);border-radius:14px;padding:18px 18px 18px;overflow-x:auto;font:.9rem/1.7 ui-monospace,Consolas,monospace;color:#cfe;white-space:pre}
+#cp{position:absolute;right:10px;top:10px;padding:4px 12px;font-size:.8rem}
+.note{color:var(--mut);font-size:.9rem;margin-top:14px;line-height:1.6}
+footer{text-align:center;color:var(--mut);padding:40px 20px 50px;font-size:.9rem}
+.nogl .hero{background:radial-gradient(circle at 50% 45%,#2a1260,transparent 60%)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<main>
+<header class="hero">
+  <div>
+    <h1>BeatBorder</h1>
+    <p class="sub">Your screen edges, dancing to every beat. A Windows app that wraps your display in a glowing gradient synced to Spotify, Apple Music, YouTube — and even the gunshots in your games.</p>
+  </div>
+  <div class="ctl">
+    <div class="row">
+      <button id="snd" class="cta">▶ Play demo beat</button>
+      <a class="btn" href="https://github.com/LalitCore/Beatboxer" target="_blank" rel="noopener noreferrer">
+        <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57C20.565 21.795 24 17.31 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        Get it on GitHub
+      </a>
+    </div>
+    <div class="row"><span class="lbl">Mode</span>
+      <button data-mode="0" class="on">Pulse</button><button data-mode="4">Spectrum</button><button data-mode="1">Comet</button><button data-mode="2">Corners</button><button data-mode="3">Ripple</button></div>
+    <div class="row"><span class="lbl">Theme</span>
+      <button data-theme="Neon" class="on">Neon</button><button data-theme="Sunset">Sunset</button><button data-theme="Aurora">Aurora</button><button data-theme="Minecraft">Minecraft</button></div>
+  </div>
+</header>
+
+<section class="p">
+  <h2>Everything you can tweak</h2>
+  <p class="lead">Open the settings window and make it yours. Every change applies live and is saved for next time.</p>
+  <div class="grid">
+    <div class="card"><div class="ic">🎛️</div><b>5 modes</b><p>Pulse, Spectrum, Comet, Corners and Ripple. Switch from the window or the tray menu.</p></div>
+    <div class="card"><div class="ic">🎨</div><b>9 themes</b><p>Neon, Sunset, Aurora, Fire, Minecraft, Ocean, Candy, auto-cycling Rainbow, or pick your own 3 colors.</p></div>
+    <div class="card"><div class="ic">🔊</div><b>React to anything</b><p>Trigger on Bass, Mid, Treble or All, and tune sensitivity, thickness, glow, speed and opacity.</p></div>
+    <div class="card"><div class="ic">🎮</div><b>Game mode</b><p>Detects gunshots and explosions from the sound and flashes a muzzle-style glow from the edges.</p></div>
+    <div class="card"><div class="ic">🪟</div><b>Click-through overlay</b><p>Sits on top of everything, never steals your mouse, and covers every monitor.</p></div>
+    <div class="card"><div class="ic">⚡</div><b>Light on your PC</b><p>Choose 30 or 60 FPS, pause anytime, and start with Windows if you want.</p></div>
+  </div>
+</section>
+
+<section class="p" id="get">
+  <h2>Get it running</h2>
+  <p class="lead">Windows 10 or 11 with Python 3.10+ (tick “Add Python to PATH” when installing).</p>
+  <div class="code" id="code"><button id="cp">Copy</button>pip install PySide6 numpy PyAudioWPatch
+pythonw beatborder_pro.py</div>
+  <p class="note">Play a song and the borders light up. Right-click the tray icon for quick modes, or double-click it to open settings. For games, use borderless windowed mode, since exclusive fullscreen hides overlays. Flashing effects can be intense, so lower Flash intensity if it bothers your eyes.</p>
+</section>
+<footer>Made with ♥ for music and gaming setups.</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const TH={Neon:['#ff00cc','#3333ff','#00e5ff'],Sunset:['#ff512f','#f09819','#dd2476'],Aurora:['#00ff87','#60efff','#7f00ff'],Minecraft:['#55ff55','#00aa00','#55ffff']};
+const P=0.5; // 120 BPM
+let actx=null,on=false,t0=performance.now()/1000,nextB=0;
+const now=()=>on?actx.currentTime:performance.now()/1000;
+let noiseBuf=null;
+function kick(t){const o=actx.createOscillator(),g=actx.createGain();o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(42,t+.14);g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.32)}
+function hat(t){const s=actx.createBufferSource(),f=actx.createBiquadFilter(),g=actx.createGain();s.buffer=noiseBuf;f.type='highpass';f.frequency.value=7000;g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);s.connect(f).connect(g).connect(actx.destination);s.start(t);s.stop(t+.06)}
+setInterval(()=>{if(!on)return;while(nextB<actx.currentTime+.12){kick(nextB);hat(nextB+P/2);nextB+=P}},25);
+const snd=document.getElementById('snd');
+snd.onclick=async()=>{
+  try{
+    if(!on){
+      actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+      await actx.resume();
+      if(!noiseBuf){noiseBuf=actx.createBuffer(1,actx.sampleRate*.1,actx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+      t0=nextB=actx.currentTime+.1;on=true;snd.innerHTML='■ Stop demo beat';
+    }else{on=false;t0=performance.now()/1000;snd.innerHTML='▶ Play demo beat'}
+  }catch(e){snd.innerHTML='Audio blocked'}
+};
+const U={uTime:{value:0},uBeat:{value:0},uSince:{value:1},uMode:{value:0},uAspect:{value:16/9},c1:{value:null},c2:{value:null},c3:{value:null}};
+function mark(sel,el){document.querySelectorAll(sel).forEach(b=>b.classList.toggle('on',b===el))}
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{U.uMode.value=+b.dataset.mode;mark('[data-mode]',b)});
+
+document.getElementById('cp').onclick=async e=>{const b=e.target;try{await navigator.clipboard.writeText('pip install PySide6 numpy PyAudioWPatch\\npythonw beatborder_pro.py');b.textContent='Copied ✓'}catch(x){b.textContent='Select & copy'}setTimeout(()=>b.textContent='Copy',1800)};
+
+try{
+const cv=document.getElementById('c');
+const R=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.setClearColor(0x050508);
+const S=new THREE.Scene();S.fog=new THREE.Fog(0x050508,5,25);
+const cam=new THREE.PerspectiveCamera(45,1,.1,50);cam.position.z=7;
+['c1','c2','c3'].forEach(k=>U[k].value=new THREE.Color());
+
+// LIGHTING & SCENE DEPTH
+const amb = new THREE.AmbientLight(0xffffff, 0.4); S.add(amb);
+const mLight = new THREE.PointLight(0xffffff, 1.2, 20); S.add(mLight);
+const backLight = new THREE.PointLight(0xff00cc, 8, 20);
+backLight.position.set(0, 0, -1);
+
+// Background wall to catch the backlight
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({color: 0x050508, roughness: 0.9, metalness: 0.1}));
+wall.position.z = -10; S.add(wall);
+
+window.setTheme=n=>{
+  TH[n].forEach((h,i)=>U['c'+(i+1)].value.set(h));
+  backLight.color.set(TH[n][0]);
+};
+setTheme('Neon');
+
+document.querySelectorAll('[data-theme]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.theme);mark('[data-theme]',b)});
+
+const mat=new THREE.ShaderMaterial({uniforms:U,vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+fragmentShader:`varying vec2 vUv;uniform float uTime,uBeat,uSince,uMode,uAspect;uniform vec3 c1,c2,c3;
+vec3 pal(float t){t=fract(t);return t<.3333?mix(c1,c2,t*3.):t<.6666?mix(c2,c3,(t-.3333)*3.):mix(c3,c1,(t-.6666)*3.);}
+void main(){
+ vec2 p=vUv-.5;vec2 q=vec2(p.x*uAspect,p.y);vec2 hf=vec2(uAspect*.5,.5);
+ float d=min(hf.x-abs(q.x),hf.y-abs(q.y));
+ float ang=atan(p.y,p.x)/6.2832+.5;float b=uBeat;
+ vec3 gc=pal(ang+uTime*.08);float g=0.;
+ if(uMode<.5){g=exp(-d*(30.-18.*b))*(.5+b*1.5)+exp(-d*120.)*1.5;}
+ else if(uMode<1.5){float t=fract(uTime*.3-ang*2.);g=exp(-d*35.)*exp(-t*9.)*(1.4+b*2.)+exp(-d*130.)*.18;}
+ else if(uMode<2.5){float dc=length(hf-abs(q));g=exp(-dc*(5.-3.*b))*(.5+b*1.2)+exp(-d*120.)*.4;}
+ else if(uMode<3.5){float r=uSince*.45,r2=(uSince+.5)*.45;float a=(d-r)*22.,a2=(d-r2)*22.;
+  g=exp(-a*a)*exp(-uSince*3.)*2.+exp(-a2*a2)*exp(-(uSince+.5)*3.)*1.2+exp(-d*100.)*.5+exp(-d*8.)*b*.4;}
+ else{float k=ang*96.;float idx=floor(k);float f=fract(k);float h=.03+.16*(.25+abs(sin(idx*1.7+uTime*3.))*(.35+b));
+  g=step(d,h)*step(.12,f)*step(f,.88)*(1.2-d/h*.6)+exp(-d*100.)*.4;}
+ vec3 col=vec3(.02,.02,.045)+.012*sin(vUv.y*900.);
+ col+=gc*g+gc*exp(-d*3.5)*(.05+.12*b);
+ col=1.-exp(-col*1.6);
+ gl_FragColor=vec4(col,1.);}`});
+
+const G=new THREE.Group();S.add(G);
+G.add(backLight); // Mount backlight to the rotating monitor
+
+// UPGRADED BEZEL (True 3D with Metalness)
+const bez=new THREE.Mesh(
+  new THREE.BoxGeometry(6.6,3.8,.25),
+  new THREE.MeshStandardMaterial({color:0x030305, roughness:0.15, metalness:0.85})
+);
+G.add(bez);
+
+// Screen rendering the shader
+const scr=new THREE.Mesh(new THREE.PlaneGeometry(6.4,3.6),mat);
+scr.position.z=.126;
+G.add(scr);
+
+// Glass reflection layer on top of screen
+const glass = new THREE.Mesh(
+  new THREE.PlaneGeometry(6.4, 3.6),
+  new THREE.MeshPhysicalMaterial({
+    color: 0x000000, metalness: 0.1, roughness: 0.1,
+    transparent: true, opacity: 0.15, clearcoat: 1.0, clearcoatRoughness: 0.1
+  })
+);
+glass.position.z = .13;
+G.add(glass);
+
+// DYNAMIC PARTICLES
+const N=600,pos=new Float32Array(N*3);
+for(let i=0;i<N;i++){
+  pos[i*3]=(Math.random()-.5)*30;
+  pos[i*3+1]=(Math.random()-.5)*20;
+  pos[i*3+2]=(Math.random()-.5)*25;
+}
+const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+const pts=new THREE.Points(pg,new THREE.PointsMaterial({size:.06,color:0xffffff,transparent:true,opacity:.5,blending:THREE.AdditiveBlending}));
+S.add(pts);
+
+let fit=1,mx=0,my=0,tx=0,ty=0;
+function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();
+ const vw=2*7*Math.tan(22.5*Math.PI/180)*cam.aspect;fit=Math.min(1,vw*.9/6.7)}
+addEventListener('resize',size);size();
+addEventListener('pointermove',e=>{tx=e.clientX/innerWidth-.5;ty=e.clientY/innerHeight-.5});
+
+(function frame(){
+ let s=(now()-t0)%P;if(s<0)s+=P;const b=Math.exp(-s*7);
+ U.uTime.value=performance.now()/1000;U.uBeat.value=b;U.uSince.value=s;
+ mx+=(tx-mx)*.06;my+=(ty-my)*.06;
+ const sc=Math.min(scrollY/innerHeight,1.5);
+ 
+ // PARALLAX CAMERA
+ cam.position.x += (tx * 4 - cam.position.x) * 0.05;
+ cam.position.y += (-ty * 3 - cam.position.y + sc*2.4) * 0.05;
+ cam.lookAt(0, sc*2.4, 0);
+ 
+ // LIGHT TRACKING
+ mLight.position.copy(cam.position);
+ 
+ // BACKLIGHT PULSING
+ backLight.intensity = 5 + b * 15;
+ backLight.distance = 15 + b * 8;
+
+ // MONITOR MOVEMENT
+ G.rotation.y = mx * 1.3;
+ G.rotation.x = -my * 0.9;
+ G.position.y = sc*2.4;
+ G.position.z = b*.4;
+ G.scale.setScalar(fit*(1+b*.02));
+ 
+ // FLYING PARTICLES
+ const pa = pts.geometry.attributes.position.array;
+ for(let i=0; i<N; i++){
+   pa[i*3+2] += 0.03 + b*0.08;
+   if(pa[i*3+2] > 10) pa[i*3+2] -= 25;
+ }
+ pts.geometry.attributes.position.needsUpdate = true;
+ pts.rotation.z += 0.0005;
+
+ R.render(S,cam);requestAnimationFrame(frame)})();
+}catch(e){document.body.classList.add('nogl');window.setTheme=()=>{}}
+</script>
+</body>
+</html>
